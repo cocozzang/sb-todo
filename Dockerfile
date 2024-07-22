@@ -1,36 +1,25 @@
-# Step 1: Build the NestJS application
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy the rest of the application code
 COPY . .
 
-# Build the NestJS application
 RUN npm run build
 
-# Step 2: Create the final image
 FROM node:20-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy the built application from the builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
+COPY --from=build /app/dist dist
+COPY --from=build /app/node_modules node_modules
+COPY --from=build /app/package.json package.json
+COPY --from=build /app/package-lock.json package-lock.json
 
-# Install only production dependencies
-RUN npm install --only=production
-
-# Expose the application port
 EXPOSE 3000
 
-# Start the NestJS application
-CMD ["node", "dist/main"]
+ENTRYPOINT [ "/bin/sh", "-c" ]
+CMD ["npm run migration:run:prod && node dist/src/main"]
