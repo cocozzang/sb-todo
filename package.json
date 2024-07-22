@@ -21,7 +21,8 @@
     "typeorm": "npm run build && npx typeorm ",
     "migration:generate": "npm run typeorm -- -d dist/database/data-source.js migration:generate",
     "migration:create": "npm run typeorm -- migration:create",
-    "migration:run": "npm run typeorm -- -d dist/database/data-source.js migration:run",
+    "migration:run:dev": "npm run typeorm -- -d dist/database/data-source.js migration:run",
+    "migration:run:prod": "npx typeorm -d dist/database/data-source.js migration:run",
     "migration:revert": "npm run typeorm -- -d dist/database/data-source.js migration:revert"
   },
   "dependencies": {
