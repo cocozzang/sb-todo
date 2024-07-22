@@ -12,9 +12,10 @@ services:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: karlcoco/sb-todo-nestjs-server
     container_name: nestjs_app
     env_file:
       - .env
