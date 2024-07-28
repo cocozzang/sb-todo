@@ -1,0 +1,54 @@
+name: CICD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+# test code가 있다면 test 진행
+# docker login
+# docker image 빌드 후 docker hub에 push
+jobs:
+  build: 
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build the nestjs_app image
+        run: docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/sb-todo-nestjs-server .
+        
+      - name: Push Docker
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/sb-todo-nestjs-server:latest
+
+# ec2 연결
+# docker hub에서 image pull
+# 새 image로 container 다시 실행
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        password: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ${{ secrets.EC2_APP_DIR }}
+          sudo git pull
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sb-todo-nestjs-server:latest
+          sudo docker compose up -d
+
