@@ -12,9 +12,6 @@ services:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
   app:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
     image: karlcoco/sb-todo-nestjs-server
     container_name: nestjs_app
     env_file:
@@ -23,7 +20,13 @@ services:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
       - db
-    # command: sh -c "npm run migration:run:prod && node dist/src/main"
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 5s
+      restart_policy:
+        condition: on-failure
 
   nginx:
     image: nginx:latest
