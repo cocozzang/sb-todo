@@ -11,6 +11,11 @@ services:
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
+  redis:
+    image: redis:7.4.0-alpine
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+
   app:
     image: karlcoco/sb-todo-nestjs-server
     container_name: nestjs_app
@@ -20,6 +25,7 @@ services:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
       - db
+      - redis
     deploy:
       replicas: 1
       update_config:
