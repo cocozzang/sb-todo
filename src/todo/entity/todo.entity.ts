@@ -1,8 +1,9 @@
 import { BaseModel } from 'src/common/entity';
-import { Column, Entity } from 'typeorm';
+import { UserEntity } from 'src/user/entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 export enum StatusEnum {
-  UNDONE,
+  UNDONE = 1,
   DONE,
 }
 
@@ -16,4 +17,7 @@ export class TodoEntity extends BaseModel {
 
   @Column({ enum: StatusEnum, default: StatusEnum.UNDONE })
   status?: StatusEnum;
+
+  @ManyToOne(() => UserEntity, (user) => user.todos)
+  author: UserEntity;
 }

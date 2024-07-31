@@ -10,6 +10,7 @@ import * as redis from 'redis';
 import RedisStore from 'connect-redis';
 import * as session from 'express-session';
 import { ENV_REDIS_URI_KEY, ENV_SESSION_SECRET_KEY } from './common/const';
+import { UserModule } from './user/user.module';
 import * as passport from 'passport';
 
 const ENV = process.env.NODE_ENV;
@@ -24,6 +25,7 @@ const ENV = process.env.NODE_ENV;
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,
     AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
