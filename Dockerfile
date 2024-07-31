@@ -22,4 +22,4 @@ COPY --from=build /app/package-lock.json package-lock.json
 EXPOSE 3000
 
 ENTRYPOINT [ "/bin/sh", "-c" ]
-CMD ["npm run migration:run:prod && node dist/src/main"]
+CMD ["npm run migration:run:prod && npm run start:prod"]
