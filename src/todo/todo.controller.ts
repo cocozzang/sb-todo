@@ -11,14 +11,17 @@ import {
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto, UpdateTodoDto } from './dto';
+import { UserEntity } from 'src/user/entity';
+import { User } from 'src/auth/decorator';
+import { SessionUser } from 'src/auth/serializer';
 
 @Controller('todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
-  getAllTodo() {
-    return this.todoService.findAllTodo();
+  getAllMyTodo(@User() user: SessionUser) {
+    return this.todoService.findAllMyTodo(user.id);
   }
 
   @Get(':todoId')
@@ -34,8 +37,8 @@ export class TodoController {
   }
 
   @Post()
-  postTodo(@Body() dto: CreateTodoDto) {
-    return this.todoService.createTodo(dto);
+  postTodo(@Body() dto: CreateTodoDto, @User() user: UserEntity) {
+    return this.todoService.createTodo(dto, user.id);
   }
 
   @Patch(':todoId')
