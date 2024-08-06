@@ -33,9 +33,13 @@ export class UserEntity extends BaseModel {
   @Column()
   name: string;
 
+  @Column({ nullable: true, name: 'profile_image' })
+  profileImage: string;
+
   @Column({
     type: 'enum',
     enum: ProviderEnum,
+    default: ProviderEnum.CREDENTIAL,
   })
   provider: ProviderEnum;
 
