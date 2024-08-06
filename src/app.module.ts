@@ -9,7 +9,11 @@ import { AuthModule } from './auth/auth.module';
 import * as redis from 'redis';
 import RedisStore from 'connect-redis';
 import * as session from 'express-session';
-import { ENV_REDIS_URI_KEY, ENV_SESSION_SECRET_KEY } from './common/const';
+import {
+  ENV_REDIS_PASSWORD_KEY,
+  ENV_REDIS_URI_KEY,
+  ENV_SESSION_SECRET_KEY,
+} from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
 
@@ -36,6 +40,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     const redisClient = redis.createClient({
       url: this.configService.get(ENV_REDIS_URI_KEY),
+      password: this.configService.get(ENV_REDIS_PASSWORD_KEY),
     });
 
     redisClient.connect().catch(console.error);
@@ -53,6 +58,7 @@ export class AppModule implements NestModule {
             httpOnly: true,
             maxAge: 300000, // 5분
           },
+          rolling: true,
         }),
 
         passport.initialize(),
