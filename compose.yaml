@@ -14,8 +14,11 @@ services:
   redis:
     image: redis:7.4.0-alpine
     container_name: redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
 
   app:
     image: karlcoco/sb-todo-nestjs-server
