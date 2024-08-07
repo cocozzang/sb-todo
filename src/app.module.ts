@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,6 +21,8 @@ import {
 } from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AuthenticatedGuard, RoleGuard } from './auth/guard';
 
 const ENV = process.env.NODE_ENV;
 
@@ -32,7 +39,12 @@ const ENV = process.env.NODE_ENV;
     UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
+    { provide: APP_GUARD, useClass: AuthenticatedGuard },
+    { provide: APP_GUARD, useClass: RoleGuard },
+    AppService,
+  ],
 })
 export class AppModule implements NestModule {
   constructor(private readonly configService: ConfigService) {}
