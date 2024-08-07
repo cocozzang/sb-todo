@@ -1,4 +1,5 @@
 import { UnprocessableEntityException } from '@nestjs/common';
+import { Exclude } from 'class-transformer';
 import { BaseModel } from 'src/common/entity';
 import { TodoEntity } from 'src/todo/entity';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
@@ -25,6 +26,7 @@ export class UserEntity extends BaseModel {
   account?: string;
 
   @Column({ nullable: true })
+  @Exclude({ toPlainOnly: true })
   password?: string;
 
   @Column({ nullable: true, unique: true })

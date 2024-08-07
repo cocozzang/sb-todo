@@ -11,27 +11,32 @@ import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { RegisterByCredentialDto } from './dto';
 import { CredentialGuard, GoogleGuard } from './guard';
+import { IsPublic } from './decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @IsPublic()
   @UseGuards(GoogleGuard)
   @Get('login/google')
   loginByGoogle() {}
 
+  @IsPublic()
   @UseGuards(GoogleGuard)
   @Get('login/google/callback')
   googleCallback() {
     return { msg: 'success to login' };
   }
 
+  @IsPublic()
   @UseGuards(CredentialGuard)
   @Post('login/credential')
   loginByCredential() {
     return;
   }
 
+  @IsPublic()
   @Post('register/credential')
   async registerByCredential(@Body() dto: RegisterByCredentialDto) {
     await this.authService.registerByCredential(dto);

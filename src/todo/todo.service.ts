@@ -15,8 +15,15 @@ export class TodoService {
     return this.todoRepository.find({ where: { author: { id: userId } } });
   }
 
+  findAllTodoForAdmin() {
+    return this.todoRepository.find();
+  }
+
   findTodoById(todoId: number) {
-    return this.todoRepository.findOne({ where: { id: todoId } });
+    return this.todoRepository.findOne({
+      where: { id: todoId },
+      relations: { author: true },
+    });
   }
 
   async createTodo(dto: CreateTodoDto, userId: number) {
