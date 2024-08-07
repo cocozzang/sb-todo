@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto, UpdateTodoDto } from './dto';
-import { UserEntity } from 'src/user/entity';
-import { User } from 'src/auth/decorator';
+import { RoleEnum, UserEntity } from 'src/user/entity';
+import { AccessLevel, User } from 'src/auth/decorator';
 import { SessionUser } from 'src/auth/serializer';
 
 @Controller('todo')
@@ -22,6 +22,12 @@ export class TodoController {
   @Get()
   getAllMyTodo(@User() user: SessionUser) {
     return this.todoService.findAllMyTodo(user.id);
+  }
+
+  @AccessLevel(RoleEnum.SUB_ADMIN)
+  @Get('all')
+  getAllTodoForAdmin() {
+    return this.todoService.findAllTodoForAdmin();
   }
 
   @Get(':todoId')
