@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { TodoService } from '../todo.service';
@@ -17,6 +18,11 @@ export class IsTodoMineOrAdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest() as Request & {
       user: UserEntity;
     };
+
+    if (!req.user)
+      throw new InternalServerErrorException(
+        'public api에 해당 guard를 사용할 수 없습니다.',
+      );
 
     const todoId = +req.params['todoId'];
 

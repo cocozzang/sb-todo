@@ -18,9 +18,11 @@ export class AuthService {
   async validateByCredential(account: string, password: string) {
     const user = await this.userRepository.findOne({ where: { account } });
 
+    if (!user) return null;
+
     const isPwdMatch = await bcrypt.compare(password, user.password);
 
-    if (user && isPwdMatch) return user;
+    if (isPwdMatch) return user;
 
     return null;
   }
