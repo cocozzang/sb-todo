@@ -1,5 +1,7 @@
 services:
   db:
+    env_file:
+      - .env.prod
     image: postgres:16
     container_name: postgres
     environment:
@@ -12,16 +14,16 @@ services:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
   redis:
+    env_file:
+      - .env.prod
     image: redis:7.4.0-alpine
     container_name: redis
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
 
   app:
-    image: karlcoco/sb-todo-nestjs-server
+    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
     container_name: nestjs_app
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
@@ -33,8 +35,13 @@ services:
       update_config:
         parallelism: 1
         delay: 5s
-      restart_policy:
-        condition: on-failure
+      # restart_policy:
+      #   condition: on-failure
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    env_file:
+      - .env.prod
+    command: /bin/sh -c "npm run migration:run:prod && npm run start:prod"
 
   nginx:
     image: nginx:latest

@@ -1,7 +1,7 @@
 source .env.dev
 
 psql() {
-  container_id=$(docker compose --env-file .env.dev ps -q db) || {
+  container_id=$(docker compose --env-file .env.dev -f compose.dev.yaml ps -q db) || {
     echo "Error getting db container ID"
     exit 1
   }
@@ -12,7 +12,7 @@ psql() {
 }
 
 redisCli() {
-  container_id=$(docker compose --env-file .env.dev ps -q redis) || {
+  container_id=$(docker compose --env-file .env.dev -f compose.dev.yaml ps -q redis) || {
     echo "Error getting redis container ID"
     exit 1
   }
