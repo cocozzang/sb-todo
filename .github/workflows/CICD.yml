@@ -3,8 +3,6 @@ name: CICD
 on:
   push:
     branches: ['main']
-  pull_request:
-    branches: ['main']
 
 permissions:
   contents: read
@@ -51,5 +49,5 @@ jobs:
             cd ${{ secrets.EC2_APP_DIR }}
             sudo git pull
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sb-todo-nestjs-server:latest
-            sudo docker compose up --env-file .env.prod -d --no-deps app
+            sudo docker compose --env-file .env.prod -f compose.prod.yaml up -d --no-deps app
             sudo docker image prune -f

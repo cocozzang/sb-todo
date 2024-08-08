@@ -1,7 +1,5 @@
 services:
   db:
-    env_file:
-      - .env.dev
     image: postgres:16
     container_name: postgres
     environment:
@@ -9,36 +7,31 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./volumes/postgres-data:/var/lib/postgresql/data
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
   redis:
-    env_file:
-      - .env.dev
     image: redis:7.4.0-alpine
     container_name: redis
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
+    env_file:
+      - .env.dev
+    volumes:
+      - ./volumes/redis-data:/data
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
 
   app:
-    env_file:
-      - .env.dev
     image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
     container_name: nestjs_app
+    env_file:
+      - .env.dev
     ports:
       - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     depends_on:
       - db
       - redis
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 1
-        delay: 5s
-      # restart_policy:
-      #   condition: on-failure
     command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
 
   nginx:
