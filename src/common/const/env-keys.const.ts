@@ -1,7 +1,11 @@
+import { config } from 'dotenv';
+
+config();
+
 export const ENV_PROTOCOL_KEY = 'PROTOCOL';
 export const ENV_HOST_KEY = 'HOST';
-export const ENV_PORT = 'PORT';
-export const ENV_AUTHORITY_KEY = 'AUTHORITY';
+export const ENV_PORT =
+  process.env.PROFILE === 'BLUE' ? 'BLUE_PORT' : 'GREEN_PORT';
 export const ENV_POSTGRES_HOST_KEY = 'POSTGRES_HOST';
 export const ENV_POSTGRES_PORT_KEY = 'POSTGRES_PORT';
 export const ENV_POSTGRES_DB_KEY = 'POSTGRES_DB';

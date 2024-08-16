@@ -22,21 +22,31 @@ services:
       - ${REDIS_PORT}:${REDIS_PORT}
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
 
-  app:
-    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
-    container_name: nestjs_app
-    restart: always
+  app_blue:
+    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server:latest
+    container_name: app_blue
     env_file:
       - .env.prod
+    environment:
+      SERVICE_PORT: ${APP_BLUE_PORT}
+      PROFILE: BLUE
     ports:
-      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 1
-        delay: 5s
-      restart_policy:
-        condition: on-failure
+      - ${APP_BLUE_PORT}:${APP_BLUE_PORT}
+    depends_on:
+      - db
+      - redis
+    command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
+
+  app_green:
+    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server:latest
+    container_name: app_green
+    env_file:
+      - .env.prod
+    environment:
+      SERVICE_PORT: ${APP_GREEN_PORT}
+      PROFILE: GREEN
+    ports:
+      - ${APP_GREEN_PORT}:${APP_GREEN_PORT}
     depends_on:
       - db
       - redis

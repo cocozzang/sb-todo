@@ -3,9 +3,7 @@ import { config } from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
 const ENV = process.env.NODE_ENV;
-
 const conf = config({ path: !ENV ? '.env.dev' : `.env.${ENV}` });
-
 dotenvExpand.expand(conf);
 
 export const dataSourceOptions: DataSourceOptions = {

@@ -22,13 +22,33 @@ services:
       - ./volumes/redis-data:/data
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
 
-  app:
-    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
-    container_name: nestjs_app
+  app_blue:
+    # image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
+    image: test-todo
+    container_name: app_blue
     env_file:
       - .env.dev
+    environment:
+      SERVICE_PORT: ${BLUE_PORT}
+      PROFILE: BLUE
     ports:
-      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
+      - ${BLUE_PORT}:${BLUE_PORT}
+    depends_on:
+      - db
+      - redis
+    command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
+
+  app_green:
+    # image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
+    image: test-todo
+    container_name: app_green
+    env_file:
+      - .env.dev
+    environment:
+      SERVICE_PORT: ${GREEN_PORT}
+      PROFILE: GREEN
+    ports:
+      - ${GREEN_PORT}:${GREEN_PORT}
     depends_on:
       - db
       - redis
@@ -41,8 +61,9 @@ services:
       - 80:80
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d/service-env.inc:/etc/nginx/conf.d/service-env.inc
     depends_on:
-      - app
+      - app_blue
 
 volumes:
   postgres_data:
