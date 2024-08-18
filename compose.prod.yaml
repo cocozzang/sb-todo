@@ -29,13 +29,13 @@ services:
       - .env.prod
     environment:
       SERVICE_PORT: ${APP_BLUE_PORT}
-      PROFILE: BLUE
+      PROFILE: blue
     ports:
       - ${APP_BLUE_PORT}:${APP_BLUE_PORT}
     depends_on:
       - db
       - redis
-    command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
+    command: /bin/sh -c "npm run mieration:run:prod && npm run start:prod"
 
   app_green:
     image: ${DOCKER_USERNAME}/sb-todo-nestjs-server:latest
@@ -44,7 +44,7 @@ services:
       - .env.prod
     environment:
       SERVICE_PORT: ${APP_GREEN_PORT}
-      PROFILE: GREEN
+      PROFILE: green
     ports:
       - ${APP_GREEN_PORT}:${APP_GREEN_PORT}
     depends_on:

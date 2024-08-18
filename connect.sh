@@ -31,4 +31,5 @@ elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   exit 1
 else
   echo "./connect.sh [--help | -h]"
+  exit 1
 fi

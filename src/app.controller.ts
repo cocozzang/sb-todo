@@ -7,8 +7,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @IsPublic()
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('app-profile')
+  getAppProfile(): string {
+    return this.appService.getAppProfile();
   }
 }
