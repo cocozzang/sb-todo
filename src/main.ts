@@ -22,9 +22,9 @@ async function bootstrap() {
 
   let port: number;
 
-  if (process.env.PROFILE === 'BLUE') {
+  if (process.env.PROFILE === 'blue') {
     port = +process.env.BLUE_PORT;
-  } else if (process.env.PROFILE === 'GREEN') {
+  } else if (process.env.PROFILE === 'green') {
     port = +process.env.GREEN_PORT;
   } else {
     port = 3000;

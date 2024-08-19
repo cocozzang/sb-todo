@@ -62,6 +62,3 @@ services:
       - ./nginx/conf.d/service-env.inc:/etc/nginx/conf.d/service-env.inc
     depends_on:
       - app_blue
-
-volumes:
-  postgres_data:
