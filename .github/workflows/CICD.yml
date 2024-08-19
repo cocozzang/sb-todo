@@ -2,7 +2,7 @@ name: CICD
 
 on:
   push:
-    tags: 
+    tags:
       - '*.*.*'
 
 permissions:
@@ -98,7 +98,6 @@ jobs:
       - name: Remove previous container and image
         uses: appleboy/ssh-action@v1.0.3
         with:
-          username: ubuntu
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
