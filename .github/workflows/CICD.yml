@@ -93,7 +93,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
-            sudo docker exec -i nginx bash -c 'echo "set \$service_url app_\${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+            sudo docker exec -i nginx bash -c 'echo "set \$service_url app_${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
 
       - name: Remove previous container and image
         uses: appleboy/ssh-action@v1.0.3
