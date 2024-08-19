@@ -96,7 +96,7 @@ jobs:
             sudo docker exec -i nginxserver bash -c 'echo "set $service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
 
       - name: Remove previous container and image
-        uses: appleboy/ssh-action@1.0.3
+        uses: appleboy/ssh-action@v1.0.3
         with:
           username: ubuntu
           host: ${{ secrets.EC2_HOST }}
