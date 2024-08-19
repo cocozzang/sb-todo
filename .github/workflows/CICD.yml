@@ -60,12 +60,12 @@ jobs:
           if [ $CURRENT_UPSTREAM = blue ]; then
             echo "CURRENT_PORT=3000" >> $GITHUB_ENV
             echo "CURRENT_UPSTREAM=blue" >> $GITHUB_ENV
-            echo "STOPPED_PORT=3001" >> $GITHUB_ENV
+            echo "TARGET_PORT=3001" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
           else
             echo "CURRENT_PORT=3001" >> $GITHUB_ENV
             echo "CURRENT_UPSTREAM=green" >> $GITHUB_ENV
-            echo "STOPPED_PORT=3000" >> $GITHUB_ENV
+            echo "TARGET_PORT=3000" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
@@ -84,6 +84,14 @@ jobs:
             echo ${{ secrets.DOCKERHUB_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sb-todo-nestjs-server:latest
             sudo docker compose --env-file .env.prod -f compose.prod.yaml up -d --no-deps app_${{ env.TARGET_UPSTREAM }}
+
+      # docker container가 정상 동작하는지 확인하고 nginx upstream을 변경.
+      - name: Check deploy server URL
+        uses: jtalk/url-health-check-action@v3
+        with:
+          url: http://${{ secrets.EC2_HOST }}:${{env.TARGET_PORT}}/app-profile
+          max-attempts: 3
+          retry-delay: 15s
 
       - name: Change nginx upstream to TARGET_UPSTREAM and remove previous upstream container
         uses: appleboy/ssh-action@v1.0.3
