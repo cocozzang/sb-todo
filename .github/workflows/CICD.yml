@@ -81,7 +81,7 @@ jobs:
           script_stop: true
           script: |
             cd ${{ secrets.EC2_APP_DIR }}
-            sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p '${{ secrets.DOCKERHUB_USERNAME }}'
+            echo ${{ secrets.DOCKERHUB_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sb-todo-nestjs-server:latest
             sudo docker compose --env-file .env.prod -f compose.prod.yaml up -d --no-deps app_${{ env.TARGET_UPSTREAM }}
 
