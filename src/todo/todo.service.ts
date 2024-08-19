@@ -11,16 +11,26 @@ export class TodoService {
     private readonly todoRepository: Repository<TodoEntity>,
   ) {}
 
-  findAllTodo() {
+  findAllMyTodo(userId: number) {
+    return this.todoRepository.find({ where: { author: { id: userId } } });
+  }
+
+  findAllTodoForAdmin() {
     return this.todoRepository.find();
   }
 
   findTodoById(todoId: number) {
-    return this.todoRepository.findOne({ where: { id: todoId } });
+    return this.todoRepository.findOne({
+      where: { id: todoId },
+      relations: { author: true },
+    });
   }
 
-  async createTodo(dto: CreateTodoDto) {
-    const todoInstance = this.todoRepository.create(dto);
+  async createTodo(dto: CreateTodoDto, userId: number) {
+    const todoInstance = this.todoRepository.create({
+      ...dto,
+      author: { id: userId },
+    });
 
     await this.todoRepository.insert(todoInstance);
 

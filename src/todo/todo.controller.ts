@@ -8,19 +8,31 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { CreateTodoDto, UpdateTodoDto } from './dto';
+import { RoleEnum, UserEntity } from 'src/user/entity';
+import { AccessLevel, User } from 'src/auth/decorator';
+import { SessionUser } from 'src/auth/serializer';
+import { IsTodoMineOrAdminGuard } from './guard';
 
 @Controller('todo')
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
-  getAllTodo() {
-    return this.todoService.findAllTodo();
+  getAllMyTodo(@User() user: SessionUser) {
+    return this.todoService.findAllMyTodo(user.id);
   }
 
+  @AccessLevel(RoleEnum.SUB_ADMIN)
+  @Get('all')
+  getAllTodoForAdmin() {
+    return this.todoService.findAllTodoForAdmin();
+  }
+
+  @UseGuards(IsTodoMineOrAdminGuard)
   @Get(':todoId')
   async getTodoById(@Param('todoId', ParseIntPipe) todoId: number) {
     const feed = await this.todoService.findTodoById(todoId);
@@ -34,10 +46,11 @@ export class TodoController {
   }
 
   @Post()
-  postTodo(@Body() dto: CreateTodoDto) {
-    return this.todoService.createTodo(dto);
+  postTodo(@Body() dto: CreateTodoDto, @User() user: UserEntity) {
+    return this.todoService.createTodo(dto, user.id);
   }
 
+  @UseGuards(IsTodoMineOrAdminGuard)
   @Patch(':todoId')
   async patchTodoById(
     @Param('todoId', ParseIntPipe) todoId: number,
@@ -53,6 +66,7 @@ export class TodoController {
     return true;
   }
 
+  @UseGuards(IsTodoMineOrAdminGuard)
   @Delete(':todoId')
   deleteTodoById(@Param('todoId', ParseIntPipe) todoId: number) {
     return this.todoService.removeTodo(todoId);

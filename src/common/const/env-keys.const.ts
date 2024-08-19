@@ -1,9 +1,21 @@
+import { config } from 'dotenv';
+
+config();
+
 export const ENV_PROTOCOL_KEY = 'PROTOCOL';
 export const ENV_HOST_KEY = 'HOST';
-export const ENV_PORT = 'PORT';
-export const ENV_AUTHORITY_KEY = 'AUTHORITY';
+export const ENV_PORT =
+  process.env.PROFILE === 'BLUE' ? 'BLUE_PORT' : 'GREEN_PORT';
 export const ENV_POSTGRES_HOST_KEY = 'POSTGRES_HOST';
 export const ENV_POSTGRES_PORT_KEY = 'POSTGRES_PORT';
 export const ENV_POSTGRES_DB_KEY = 'POSTGRES_DB';
 export const ENV_POSTGRES_USER_KEY = 'POSTGRES_USER';
 export const ENV_POSTGRES_PASSWORD_KEY = 'POSTGRES_PASSWORD';
+export const ENV_HASH_ROUND_KEY = 'HASH_ROUND';
+export const ENV_SESSION_SECRET_KEY = 'SESSION_SECRET';
+export const ENV_REDIS_URI_KEY = 'REDIS_URI';
+export const ENV_REDIS_PASSWORD_KEY = 'REDIS_PASSWORD';
+export const ENV_REDIS_PORT_KEY = 'REDIS_PORT';
+export const ENV_GOOGLE_CLIENT_ID_KEY = 'GOOGLE_CLIENT_ID';
+export const ENV_GOOGLE_SECRET_KEY = 'GOOGLE_SECRET';
+export const ENV_GOOGLE_CALLBACK_URL_KEY = 'GOOGLE_CALLBACK_URI';

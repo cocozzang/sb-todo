@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4.0-alpine
+    container_name: redis
+    restart: always
+    env_file:
+      - .env.prod
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - ./volumes/redis-data:/data
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+
+  app_blue:
+    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server:latest
+    container_name: app_blue
+    env_file:
+      - .env.prod
+    environment:
+      SERVICE_PORT: ${BLUE_PORT}
+      PROFILE: blue
+    ports:
+      - ${BLUE_PORT}:${BLUE_PORT}
+    depends_on:
+      - db
+      - redis
+    command: /bin/sh -c "npm run migration:run:prod && npm run start:prod"
+
+  app_green:
+    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server:latest
+    container_name: app_green
+    env_file:
+      - .env.prod
+    environment:
+      SERVICE_PORT: ${GREEN_PORT}
+      PROFILE: green
+    ports:
+      - ${GREEN_PORT}:${GREEN_PORT}
+    depends_on:
+      - db
+      - redis
+    command: /bin/sh -c "npm run migration:run:prod && npm run start:prod"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app_blue
+      - app_green
