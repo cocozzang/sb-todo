@@ -20,4 +20,10 @@ export class TodoEntity extends BaseModel {
 
   @ManyToOne(() => UserEntity, (user) => user.todos)
   author: UserEntity;
+
+  @Column({ nullable: true })
+  startDate: Date;
+
+  @Column({ nullable: true })
+  endDate: Date;
 }

@@ -12,7 +12,10 @@ export class TodoService {
   ) {}
 
   findAllMyTodo(userId: number) {
-    return this.todoRepository.find({ where: { author: { id: userId } } });
+    return this.todoRepository.find({
+      where: { author: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   findAllTodoForAdmin() {
