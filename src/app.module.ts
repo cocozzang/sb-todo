@@ -15,6 +15,7 @@ import * as redis from 'redis';
 import RedisStore from 'connect-redis';
 import * as session from 'express-session';
 import {
+  COOKIE_MAX_AGE,
   ENV_REDIS_PASSWORD_KEY,
   ENV_REDIS_URI_KEY,
   ENV_SESSION_SECRET_KEY,
@@ -68,9 +69,11 @@ export class AppModule implements NestModule {
           secret: this.configService.get(ENV_SESSION_SECRET_KEY),
           cookie: {
             httpOnly: true,
-            maxAge: 300000, // 5분
+            maxAge: COOKIE_MAX_AGE, // one day
+            secure: false,
+            sameSite: 'lax',
           },
-          rolling: true,
+          rolling: false,
         }),
 
         passport.initialize(),
