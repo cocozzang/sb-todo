@@ -56,11 +56,7 @@ export class AuthService {
   }
 
   async registerByCredential(dto: RegisterByCredentialDto) {
-    const salt = await bcrypt.genSalt(
-      +this.configService.get(ENV_HASH_ROUND_KEY),
-    );
-
-    const hash = await bcrypt.hash(dto.password, salt);
+    const hash = await this.hashPassword(dto.password);
 
     const userInstance = this.userRepository.create({
       ...dto,
@@ -80,5 +76,15 @@ export class AuthService {
     }
 
     return userInstance;
+  }
+
+  async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt(
+      +this.configService.get(ENV_HASH_ROUND_KEY),
+    );
+
+    const hash = await bcrypt.hash(password, salt);
+
+    return hash;
   }
 }

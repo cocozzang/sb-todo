@@ -21,7 +21,7 @@ $ npm run start:prod
 
 ```bash
 # entity가지고 migration file 생성하기
-$ npm run migration:generate
+$ npm run migration:generate database/migrations/migration file name
 
 # migration적용하기
 $ npm run migration:run:dev

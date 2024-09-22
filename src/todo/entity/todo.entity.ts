@@ -18,7 +18,7 @@ export class TodoEntity extends BaseModel {
   @Column({ enum: StatusEnum, default: StatusEnum.UNDONE })
   status?: StatusEnum;
 
-  @ManyToOne(() => UserEntity, (user) => user.todos)
+  @ManyToOne(() => UserEntity, (user) => user.todos, { onDelete: 'CASCADE' })
   author: UserEntity;
 
   @Column({ nullable: true })
