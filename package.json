@@ -13,7 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=prod node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "NODE_ENV=test jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -21,6 +21,7 @@
     "typeorm": "npm run build && npx typeorm",
     "migration:generate": "npm run typeorm -- -d dist/database/data-source.js migration:generate",
     "migration:run:dev": "npm run typeorm -- -d dist/database/data-source.js migration:run ",
+    "migration:run:test": "NODE_ENV=test npm run typeorm -- -d dist/database/data-source.js migration:run ",
     "migration:run:prod": "NODE_ENV=prod npm run typeorm -- -d dist/database/data-source.js migration:run"
   },
   "dependencies": {

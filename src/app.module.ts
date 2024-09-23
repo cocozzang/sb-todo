@@ -3,6 +3,7 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -22,17 +23,17 @@ import {
 } from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthenticatedGuard, RoleGuard } from './auth/guard';
 
-const ENV = process.env.NODE_ENV;
+const ENV = process.env.NODE_ENV ?? 'dev';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      envFilePath: !ENV ? '.env.dev' : `.env.${ENV}`,
+      envFilePath: `.env.${ENV}`,
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,
@@ -41,6 +42,15 @@ const ENV = process.env.NODE_ENV;
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    },
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
     { provide: APP_GUARD, useClass: AuthenticatedGuard },
     { provide: APP_GUARD, useClass: RoleGuard },

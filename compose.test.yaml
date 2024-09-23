@@ -1,0 +1,33 @@
+services:
+  test-db:
+    image: postgres:16
+    container_name: test-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./volumes/test/postgres-data:/var/lib/postgresql/data
+    expose:
+      - '5433'
+    ports:
+      - '5433:5433'
+    command: -p 5433
+    networks:
+      - sb-test
+
+  test-redis:
+    image: 'redis:7.4.0-alpine'
+    container_name: test-redis
+    ports:
+      - '6380:6380'
+    env_file:
+      - .env.test
+    volumes:
+      - ./volumes/test/redis-data:/data
+    command: /bin/sh -c "redis-server --port 6380 --requirepass $$REDIS_PASSWORD"
+    networks:
+      - sb-test
+
+networks:
+  sb-test:
