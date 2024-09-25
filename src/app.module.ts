@@ -9,7 +9,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { dataSourceOptions } from 'database/data-source';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import * as redis from 'redis';
@@ -25,15 +24,14 @@ import { UserModule } from './user/user.module';
 import * as passport from 'passport';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthenticatedGuard, RoleGuard } from './auth/guard';
-
-const ENV = process.env.NODE_ENV ?? 'dev';
+import { dataSourceOptions } from '../database/data-source';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      envFilePath: `.env.${ENV}`,
+      envFilePath: `.env.${process.env.NODE_ENV ?? 'dev'}`,
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,

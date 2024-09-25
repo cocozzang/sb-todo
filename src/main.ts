@@ -5,8 +5,7 @@ import { config } from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
 async function bootstrap() {
-  const ENV = process.env.NODE_ENV ?? 'dev';
-  const conf = config({ path: `.env.${ENV}` });
+  const conf = config({ path: `.env.${process.env.NODE_ENV ?? 'dev'}` });
   dotenvExpand.expand(conf);
 
   const app = await NestFactory.create(AppModule, { cors: true });
