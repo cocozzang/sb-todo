@@ -6,6 +6,22 @@ import * as redis from 'redis';
 import { RegisterByCredentialDto } from '../src/auth/dto';
 import { dataSource } from '../database/data-source';
 
+export async function getSessionCookie(
+  user: RegisterByCredentialDto,
+  server: any,
+) {
+  await request(server).post('/auth/register/credential').send(user);
+  await request(server).post('/auth/login/credential').send(user);
+
+  const loginResponse = await request(server)
+    .post('/auth/login/credential')
+    .send({ account: user.account, password: user.password });
+
+  const cookie = loginResponse.headers['set-cookie'];
+
+  return cookie;
+}
+
 describe('TodoController (e2e)', () => {
   let app: INestApplication;
   let redisClient: redis.RedisClientType;
@@ -79,7 +95,7 @@ describe('TodoController (e2e)', () => {
     it('request success, 201', async () => {
       const loginResponse = await request(app.getHttpServer())
         .post('/auth/login/credential')
-        .send({ account: 'coco', password: '123' })
+        .send({ account: user.account, password: user.password })
         .expect(201);
 
       cookie = loginResponse.headers['set-cookie'];
@@ -91,7 +107,7 @@ describe('TodoController (e2e)', () => {
     });
 
     it('login 정보가 다릅니다, 401', () => {
-      return request(app.getHttpServer())
+      return request(server)
         .post('/auth/login/credential')
         .send({ account: 'coco1', password: '123' })
         .expect(401);
@@ -101,7 +117,7 @@ describe('TodoController (e2e)', () => {
   describe('POST - /auth/logout', () => {
     it('request success, 201', async () => {
       console.log(cookie);
-      const res = await request(app.getHttpServer())
+      const res = await request(server)
         .post('/auth/logout')
         .set('Cookie', cookie);
 
@@ -110,7 +126,7 @@ describe('TodoController (e2e)', () => {
 
     it('session cookie가 없는 경우, 401', async () => {
       console.log(cookie);
-      const res = await request(app.getHttpServer()).post('/auth/logout');
+      const res = await request(server).post('/auth/logout');
 
       expect(res.status).toEqual(401);
     });
