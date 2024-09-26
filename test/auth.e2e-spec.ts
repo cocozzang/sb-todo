@@ -1,26 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
 import * as redis from 'redis';
-import { RegisterByCredentialDto } from '../src/auth/dto';
 import { dataSource } from '../database/data-source';
-
-export async function getSessionCookie(
-  user: RegisterByCredentialDto,
-  server: any,
-) {
-  await request(server).post('/auth/register/credential').send(user);
-  await request(server).post('/auth/login/credential').send(user);
-
-  const loginResponse = await request(server)
-    .post('/auth/login/credential')
-    .send({ account: user.account, password: user.password });
-
-  const cookie = loginResponse.headers['set-cookie'];
-
-  return cookie;
-}
+import { user } from './utils';
 
 describe('TodoController (e2e)', () => {
   let app: INestApplication;
@@ -57,12 +41,6 @@ describe('TodoController (e2e)', () => {
     await redisClient.disconnect();
     await app.close();
   });
-
-  const user: RegisterByCredentialDto = {
-    account: 'coco',
-    password: '123',
-    name: 'cocodev',
-  };
 
   const notValideUser = {
     notvaliadprops: 'not valid',

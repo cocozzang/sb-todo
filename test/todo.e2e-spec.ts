@@ -1,12 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
 import * as redis from 'redis';
 import { dataSource } from '../database/data-source';
-import { RegisterByCredentialDto } from '../src/auth/dto';
-import { CreateTodoDto, UpdateTodoDto } from '../src/todo/dto';
-import { getSessionCookie } from './auth.e2e-spec';
+import {
+  editedTodo,
+  getSessionCookie,
+  todo,
+  todo2,
+  user,
+  user2,
+} from './utils';
 
 describe('TodoController (e2e)', () => {
   let app: INestApplication;
@@ -44,39 +49,6 @@ describe('TodoController (e2e)', () => {
     await redisClient.disconnect();
     await app.close();
   });
-
-  const user: RegisterByCredentialDto = {
-    account: 'coco',
-    password: '123',
-    name: 'cocodev',
-  };
-
-  const user2: RegisterByCredentialDto = {
-    account: 'coco2',
-    password: '123',
-    name: 'coco2',
-  };
-
-  const todo: CreateTodoDto = {
-    title: 'todo1',
-    description: 'desc1',
-    startDate: new Date(),
-    endDate: new Date(+new Date() + 86400000),
-  };
-
-  const editedTodo: UpdateTodoDto = {
-    title: 'todo edited',
-    description: 'description edited',
-    startDate: new Date(+new Date() + 24 * 60 * 60 * 1000),
-    endDate: new Date(+new Date() + 2 * 24 * 60 * 60 * 1000),
-  };
-
-  const todo2: CreateTodoDto = {
-    title: 'todo2',
-    description: 'desc2',
-    startDate: new Date(),
-    endDate: new Date(+new Date() + 86400000),
-  };
 
   describe('Preprocess for test', () => {
     it('login and store cookies', async () => {
