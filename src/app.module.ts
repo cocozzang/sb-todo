@@ -1,8 +1,11 @@
 import {
   ClassSerializerInterceptor,
+  HttpException,
+  HttpStatus,
   MiddlewareConsumer,
   Module,
   NestModule,
+  ValidationError,
   ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -25,6 +28,10 @@ import * as passport from 'passport';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthenticatedGuard, RoleGuard } from './auth/guard';
 import { dataSourceOptions } from '../database/data-source';
+import {
+  getAllConstraints,
+  getCustomValidationError,
+} from './common/validation';
 
 @Module({
   imports: [
@@ -47,6 +54,11 @@ import { dataSourceOptions } from '../database/data-source';
         transformOptions: { enableImplicitConversion: true },
         whitelist: true,
         forbidNonWhitelisted: true,
+        exceptionFactory: (errors: ValidationError[]) =>
+          new HttpException(
+            getCustomValidationError(getAllConstraints(errors)),
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          ),
       }),
     },
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
