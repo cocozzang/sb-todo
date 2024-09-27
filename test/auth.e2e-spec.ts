@@ -61,11 +61,11 @@ describe('TodoController (e2e)', () => {
         .expect(409);
     });
 
-    it('유효하지않은 request body, 400', () => {
+    it('유효하지않은 request body, 422', () => {
       return request(server)
         .post('/auth/register/credential')
         .send(notValideUser)
-        .expect(400);
+        .expect(422);
     });
   });
 

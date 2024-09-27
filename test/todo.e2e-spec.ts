@@ -7,6 +7,7 @@ import { dataSource } from '../database/data-source';
 import {
   editedTodo,
   getSessionCookie,
+  notValidTodo,
   todo,
   todo2,
   user,
@@ -72,6 +73,18 @@ describe('TodoController (e2e)', () => {
         .send(todo2)
         .expect(201);
     });
+
+    it('유효하지 않은 request body, 422', () => {
+      return request(app.getHttpServer())
+        .post('/todo')
+        .set('Cookie', cookie)
+        .send(notValidTodo)
+        .expect(422);
+    });
+
+    it('not authenticated, 401', () => {
+      return request(app.getHttpServer()).post('/todo').expect(401);
+    });
   });
 
   describe('GET - /todo', () => {
@@ -97,7 +110,7 @@ describe('TodoController (e2e)', () => {
       });
     });
 
-    it('not authorized, 401', () => {
+    it('not authenticated, 401', () => {
       return request(app.getHttpServer()).get('/todo').expect(401);
     });
   });
@@ -123,7 +136,11 @@ describe('TodoController (e2e)', () => {
         .expect(404);
     });
 
-    it('not authenticated, 403', () => {
+    it('not authenticated, 401', () => {
+      return request(app.getHttpServer()).get('/todo/1').expect(401);
+    });
+
+    it('not authorized, 403', () => {
       return request(app.getHttpServer())
         .get('/todo/1')
         .set('Cookie', cookie2)
@@ -150,20 +167,28 @@ describe('TodoController (e2e)', () => {
       });
     });
 
+    it('유효하지않은 request body, 422', () => {
+      return request(server)
+        .patch('/todo/1')
+        .set('Cookie', cookie)
+        .send(notValidTodo)
+        .expect(422);
+    });
+
     it('not found, 404', () => {
       return request(app.getHttpServer())
-        .get('/todo/404')
+        .patch('/todo/404')
         .set('Cookie', cookie)
         .expect(404);
     });
 
-    it('not authorized, 401', () => {
-      return request(app.getHttpServer()).get('/todo/1').expect(401);
+    it('not authenticated, 401', () => {
+      return request(app.getHttpServer()).patch('/todo/1').expect(401);
     });
 
-    it('not authenticated, 403', () => {
+    it('not authorized, 403', () => {
       return request(app.getHttpServer())
-        .get('/todo/1')
+        .patch('/todo/1')
         .set('Cookie', cookie2)
         .expect(403);
     });
@@ -196,11 +221,11 @@ describe('TodoController (e2e)', () => {
         .expect(404);
     });
 
-    it('not authorized, 401', () => {
+    it('not authenticated, 401', () => {
       return request(app.getHttpServer()).delete('/todo/2').expect(401);
     });
 
-    it('not authenticated, 403', () => {
+    it('not authorized, 403', () => {
       return request(app.getHttpServer())
         .delete('/todo/2')
         .set('Cookie', cookie2)
