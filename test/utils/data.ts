@@ -34,12 +34,8 @@ const todo2: CreateTodoDto = {
   endDate: new Date(+new Date() + 86400000),
 };
 
-const notValidUser = {
+const notValidData = {
   notvaliadprops: 'not valid',
 };
 
-const notValidTodo = {
-  notvaliadprops: 'not valid',
-};
-
-export { user, user2, todo, editedTodo, todo2, notValidUser, notValidTodo };
+export { user, user2, todo, editedTodo, todo2, notValidData };

@@ -7,7 +7,7 @@ import { dataSource } from '../database/data-source';
 import {
   editedTodo,
   getSessionCookie,
-  notValidTodo,
+  notValidData,
   todo,
   todo2,
   user,
@@ -78,7 +78,7 @@ describe('TodoController (e2e)', () => {
       return request(app.getHttpServer())
         .post('/todo')
         .set('Cookie', cookie)
-        .send(notValidTodo)
+        .send(notValidData)
         .expect(422);
     });
 
@@ -171,7 +171,7 @@ describe('TodoController (e2e)', () => {
       return request(server)
         .patch('/todo/1')
         .set('Cookie', cookie)
-        .send(notValidTodo)
+        .send(notValidData)
         .expect(422);
     });
 

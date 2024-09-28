@@ -4,7 +4,7 @@ import { AppModule } from '../src/app.module';
 import * as request from 'supertest';
 import * as redis from 'redis';
 import { dataSource } from '../database/data-source';
-import { user } from './utils';
+import { notValidData, user } from './utils';
 
 describe('TodoController (e2e)', () => {
   let app: INestApplication;
@@ -42,10 +42,6 @@ describe('TodoController (e2e)', () => {
     await app.close();
   });
 
-  const notValideUser = {
-    notvaliadprops: 'not valid',
-  };
-
   describe('POST - /auth/register/credential', () => {
     it('request success, 201', () => {
       return request(server)
@@ -64,7 +60,7 @@ describe('TodoController (e2e)', () => {
     it('유효하지않은 request body, 422', () => {
       return request(server)
         .post('/auth/register/credential')
-        .send(notValideUser)
+        .send(notValidData)
         .expect(422);
     });
   });
