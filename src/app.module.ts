@@ -1,14 +1,17 @@
 import {
   ClassSerializerInterceptor,
+  HttpException,
+  HttpStatus,
   MiddlewareConsumer,
   Module,
   NestModule,
+  ValidationError,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { dataSourceOptions } from 'database/data-source';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import * as redis from 'redis';
@@ -22,17 +25,20 @@ import {
 } from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthenticatedGuard, RoleGuard } from './auth/guard';
-
-const ENV = process.env.NODE_ENV;
+import { dataSourceOptions } from '../database/data-source';
+import {
+  getAllConstraints,
+  getCustomValidationError,
+} from './common/validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      envFilePath: !ENV ? '.env.dev' : `.env.${ENV}`,
+      envFilePath: `.env.${process.env.NODE_ENV ?? 'dev'}`,
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,
@@ -41,6 +47,20 @@ const ENV = process.env.NODE_ENV;
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        exceptionFactory: (errors: ValidationError[]) =>
+          new HttpException(
+            getCustomValidationError(getAllConstraints(errors)),
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          ),
+      }),
+    },
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
     { provide: APP_GUARD, useClass: AuthenticatedGuard },
     { provide: APP_GUARD, useClass: RoleGuard },

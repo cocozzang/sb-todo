@@ -1,24 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { config } from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
 async function bootstrap() {
-  const ENV = process.env.NODE_ENV;
-  const conf = config({ path: !ENV ? '.env.dev' : `.env.${ENV}` });
+  const conf = config({ path: `.env.${process.env.NODE_ENV ?? 'dev'}` });
   dotenvExpand.expand(conf);
 
   const app = await NestFactory.create(AppModule, { cors: true });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
-  );
 
   let port: number;
 
@@ -35,7 +25,7 @@ async function bootstrap() {
   await app.listen(port);
 
   logger.verbose(
-    `PROFILE: ${process.env.PROFILE ?? 'DEV'}, PORT: ${port}, Listining on ${await app.getUrl()}`,
+    `PROFILE: ${process.env.PROFILE}, PORT: ${port}, Listining on ${await app.getUrl()}`,
   );
 }
 

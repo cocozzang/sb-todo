@@ -2,63 +2,27 @@ services:
   db:
     image: postgres:16
     container_name: postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file:
+      - .env.dev
     volumes:
-      - ./volumes/postgres-data:/var/lib/postgresql/data
+      - ./volumes/dev/postgres-data:/var/lib/postgresql/data
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+      - '5432:5432'
+    networks:
+      - sb-dev
 
   redis:
     image: redis:7.4.0-alpine
     container_name: redis
     ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
+      - '6379:6379'
     env_file:
       - .env.dev
     volumes:
-      - ./volumes/redis-data:/data
+      - ./volumes/dev/redis-data:/data
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    networks:
+      - sb-dev
 
-  app_blue:
-    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
-    container_name: app_blue
-    env_file:
-      - .env.dev
-    environment:
-      SERVICE_PORT: ${BLUE_PORT}
-      PROFILE: blue
-    ports:
-      - ${BLUE_PORT}:${BLUE_PORT}
-    depends_on:
-      - db
-      - redis
-    command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
-
-  app_green:
-    image: ${DOCKER_USERNAME}/sb-todo-nestjs-server
-    container_name: app_green
-    env_file:
-      - .env.dev
-    environment:
-      SERVICE_PORT: ${GREEN_PORT}
-      PROFILE: green
-    ports:
-      - ${GREEN_PORT}:${GREEN_PORT}
-    depends_on:
-      - db
-      - redis
-    command: /bin/sh -c "npm run migration:run:dev && npm run start:dev"
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - 80:80
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d/service-env.inc:/etc/nginx/conf.d/service-env.inc
-    depends_on:
-      - app_blue
+networks:
+  sb-dev:
