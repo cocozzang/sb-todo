@@ -17,9 +17,9 @@ export class UpdateTodoDto extends PartialType(TodoEntity) {
 
   @IsDate()
   @IsOptional()
-  startDate: Date | null;
+  startDate?: Date | null;
 
   @IsDate()
   @IsOptional()
-  endDate: Date | null;
+  endDate?: Date | null;
 }
