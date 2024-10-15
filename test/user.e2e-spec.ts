@@ -12,8 +12,8 @@ describe('TodoController (e2e)', () => {
   let app: INestApplication;
   let redisClient: redis.RedisClientType;
   let server: any;
-  let cookie: string;
-  let cookie2: string;
+  let adminCookie: string;
+  let userCookie: string;
 
   beforeAll(async () => {
     await dataSource.initialize();
@@ -49,19 +49,25 @@ describe('TodoController (e2e)', () => {
 
   describe('Preprocess for test', () => {
     it('login and store cookies', async () => {
-      cookie = await getSessionCookie(user, server);
-      cookie2 = await getSessionCookie(user2, server);
+      adminCookie = await getSessionCookie(user, true, server, dataSource);
+      userCookie = await getSessionCookie(user2, false, server);
     });
   });
 
   describe('GET - /user/:id', () => {
     //로그인 후 받은 쿠키 포함해서 요청 보내기 login부터 해보자
     it('request success, 200', async () => {
-      await request(server).get('/user/1').set('Cookie', cookie).expect(200);
+      await request(server)
+        .get('/user/1')
+        .set('Cookie', adminCookie)
+        .expect(200);
     });
 
-    it('not found, 404', () => {
-      return request(server).get('/user/404').set('Cookie', cookie).expect(404);
+    it('bad request, 400', async () => {
+      await request(server)
+        .get('/user/asd')
+        .set('Cookie', adminCookie)
+        .expect(400);
     });
 
     it('not authenticated, 401', () => {
@@ -69,7 +75,17 @@ describe('TodoController (e2e)', () => {
     });
 
     it('not authorized, 403', () => {
-      return request(server).get('/user/1').set('Cookie', cookie2).expect(403);
+      return request(server)
+        .get('/user/1')
+        .set('Cookie', userCookie)
+        .expect(403);
+    });
+
+    it('not found, 404', () => {
+      return request(server)
+        .get('/user/404')
+        .set('Cookie', adminCookie)
+        .expect(404);
     });
   });
 
@@ -77,7 +93,7 @@ describe('TodoController (e2e)', () => {
     it('request success, 200', () => {
       return request(server)
         .patch('/user/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(updateUserDto)
         .expect(200);
     });
@@ -85,7 +101,7 @@ describe('TodoController (e2e)', () => {
     it('not valid request body, 422', () => {
       return request(server)
         .patch('/user/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(notValidData)
         .expect(422);
     });
@@ -93,7 +109,7 @@ describe('TodoController (e2e)', () => {
     it('not found, 404', () => {
       return request(server)
         .patch('/user/404')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(404);
     });
 
@@ -104,17 +120,17 @@ describe('TodoController (e2e)', () => {
     it('not authorized, 403', () => {
       return request(server)
         .patch('/user/1')
-        .set('Cookie', cookie2)
+        .set('Cookie', userCookie)
         .expect(403);
     });
   });
 
   describe('DELETE - /user/:id', () => {
-    it('not found, 404', () => {
+    it('not authorized, 403', () => {
       return request(server)
-        .delete('/user/404')
-        .set('Cookie', cookie)
-        .expect(404);
+        .delete('/user/123')
+        .set('Cookie', adminCookie)
+        .expect(403);
     });
 
     it('not authenticated, 401', () => {
@@ -124,14 +140,14 @@ describe('TodoController (e2e)', () => {
     it('not authorized, 403', () => {
       return request(server)
         .delete('/user/1')
-        .set('Cookie', cookie2)
+        .set('Cookie', userCookie)
         .expect(403);
     });
 
     it('request success, 200', () => {
       return request(server)
         .delete('/user/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
     });
   });

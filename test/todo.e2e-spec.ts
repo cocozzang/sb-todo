@@ -18,8 +18,8 @@ describe('TodoController (e2e)', () => {
   let app: INestApplication;
   let redisClient: redis.RedisClientType;
   let server: any;
-  let cookie: string;
-  let cookie2: string;
+  let adminCookie: string;
+  let userCookie: string;
 
   beforeAll(async () => {
     await dataSource.initialize();
@@ -53,8 +53,8 @@ describe('TodoController (e2e)', () => {
 
   describe('Preprocess for test', () => {
     it('login and store cookies', async () => {
-      cookie = await getSessionCookie(user, server);
-      cookie2 = await getSessionCookie(user2, server);
+      adminCookie = await getSessionCookie(user, true, server, dataSource);
+      userCookie = await getSessionCookie(user2, false, server);
     });
   });
 
@@ -63,13 +63,13 @@ describe('TodoController (e2e)', () => {
     it('request success, 201', async () => {
       await request(app.getHttpServer())
         .post('/todo')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(todo)
         .expect(201);
 
       await request(app.getHttpServer())
         .post('/todo')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(todo2)
         .expect(201);
     });
@@ -77,7 +77,7 @@ describe('TodoController (e2e)', () => {
     it('유효하지 않은 request body, 422', () => {
       return request(app.getHttpServer())
         .post('/todo')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(notValidData)
         .expect(422);
     });
@@ -91,7 +91,7 @@ describe('TodoController (e2e)', () => {
     it('request success 200', async () => {
       const res = await request(app.getHttpServer())
         .get('/todo')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
@@ -119,7 +119,7 @@ describe('TodoController (e2e)', () => {
     it('request success, 200', async () => {
       const res = await request(app.getHttpServer())
         .get('/todo/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
 
       expect(res.body).toMatchObject({
@@ -132,7 +132,7 @@ describe('TodoController (e2e)', () => {
     it('not found, 404', () => {
       return request(app.getHttpServer())
         .get('/todo/404')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(404);
     });
 
@@ -143,7 +143,7 @@ describe('TodoController (e2e)', () => {
     it('not authorized, 403', () => {
       return request(app.getHttpServer())
         .get('/todo/1')
-        .set('Cookie', cookie2)
+        .set('Cookie', userCookie)
         .expect(403);
     });
   });
@@ -152,12 +152,12 @@ describe('TodoController (e2e)', () => {
     it('request success, 200', async () => {
       await request(app.getHttpServer())
         .patch('/todo/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(editedTodo);
 
       const res = await request(app.getHttpServer())
         .get('/todo/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
 
       expect(res.body).toMatchObject({
@@ -170,7 +170,7 @@ describe('TodoController (e2e)', () => {
     it('유효하지않은 request body, 422', () => {
       return request(server)
         .patch('/todo/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .send(notValidData)
         .expect(422);
     });
@@ -178,7 +178,7 @@ describe('TodoController (e2e)', () => {
     it('not found, 404', () => {
       return request(app.getHttpServer())
         .patch('/todo/404')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(404);
     });
 
@@ -189,7 +189,7 @@ describe('TodoController (e2e)', () => {
     it('not authorized, 403', () => {
       return request(app.getHttpServer())
         .patch('/todo/1')
-        .set('Cookie', cookie2)
+        .set('Cookie', userCookie)
         .expect(403);
     });
   });
@@ -198,12 +198,12 @@ describe('TodoController (e2e)', () => {
     it('request success, 200', async () => {
       await request(app.getHttpServer())
         .delete('/todo/1')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
 
       const res = await request(app.getHttpServer())
         .get('/todo')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(200);
 
       expect(res.body.length).toBe(1);
@@ -217,7 +217,7 @@ describe('TodoController (e2e)', () => {
     it('not found, 404', () => {
       return request(app.getHttpServer())
         .delete('/todo/404')
-        .set('Cookie', cookie)
+        .set('Cookie', adminCookie)
         .expect(404);
     });
 
@@ -228,7 +228,7 @@ describe('TodoController (e2e)', () => {
     it('not authorized, 403', () => {
       return request(app.getHttpServer())
         .delete('/todo/2')
-        .set('Cookie', cookie2)
+        .set('Cookie', userCookie)
         .expect(403);
     });
   });
