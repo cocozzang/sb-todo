@@ -2,6 +2,7 @@ import {
   ClassSerializerInterceptor,
   HttpException,
   HttpStatus,
+  Inject,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -14,15 +15,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
-import * as redis from 'redis';
 import RedisStore from 'connect-redis';
 import * as session from 'express-session';
-import {
-  COOKIE_MAX_AGE,
-  ENV_REDIS_PASSWORD_KEY,
-  ENV_REDIS_URI_KEY,
-  ENV_SESSION_SECRET_KEY,
-} from './common/const';
+import { COOKIE_MAX_AGE, ENV_SESSION_SECRET_KEY } from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -32,6 +27,8 @@ import {
   getAllConstraints,
   getCustomValidationError,
 } from './common/validation';
+import { RedisModule } from './common/redis.module';
+import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -40,6 +37,7 @@ import {
       expandVariables: true,
       envFilePath: `.env.${process.env.NODE_ENV ?? 'dev'}`,
     }),
+    RedisModule,
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,
     AuthModule,
@@ -68,22 +66,16 @@ import {
   ],
 })
 export class AppModule implements NestModule {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject('REDIS_STORE') private readonly redisStore: RedisStore,
+  ) {}
 
   configure(consumer: MiddlewareConsumer) {
-    const redisClient = redis.createClient({
-      url: this.configService.get(ENV_REDIS_URI_KEY),
-      password: this.configService.get(ENV_REDIS_PASSWORD_KEY),
-    });
-
-    redisClient.connect().catch(console.error);
-
-    const redisStore = new RedisStore({ client: redisClient });
-
     consumer
       .apply(
         session({
-          store: redisStore,
+          store: this.redisStore,
           resave: false,
           saveUninitialized: false,
           secret: this.configService.get(ENV_SESSION_SECRET_KEY),
@@ -98,6 +90,7 @@ export class AppModule implements NestModule {
 
         passport.initialize(),
         passport.session(),
+        cookieParser(),
       )
       .forRoutes('*');
   }
