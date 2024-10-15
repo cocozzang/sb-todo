@@ -5,6 +5,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Patch,
   Req,
   UseGuards,
@@ -22,7 +23,7 @@ export class UserController {
   // session user와 해당 userId의 유저가 본인 또는 sub admin권한이 있을때 guard pass
   @UseGuards(IsUserMineOrAdminGuard)
   @Get(':userId')
-  async getUserById(@Param('userId') userId: number) {
+  async getUserById(@Param('userId', ParseIntPipe) userId: number) {
     const user = await this.userService.findUserById(userId);
 
     if (!user) {

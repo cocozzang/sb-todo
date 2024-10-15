@@ -4,7 +4,6 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { RoleEnum, UserEntity } from 'src/user/entity';
@@ -26,13 +25,13 @@ export class IsUserMineOrAdminGuard implements CanActivate {
 
     const userId = +req.params['userId'];
 
-    const user = await this.userService.findUserById(userId);
-
-    if (!user) throw new NotFoundException('해당 user는 존재하지 않습니다.');
+    // validation pipe가 해당에러를 처리하도록 guard를 그냥 통과 시킵니다.
+    // 적절한 접근방법인지 잘 모르겠네용.
+    if (isNaN(userId)) return true;
 
     if (req.user.role <= RoleEnum.SUB_ADMIN) return true;
 
-    const isMine = user.id === req.user.id;
+    const isMine = userId === req.user.id;
 
     if (!isMine)
       throw new ForbiddenException('작성자 본인만 접근가능한 api입니다.');

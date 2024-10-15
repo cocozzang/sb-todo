@@ -26,11 +26,14 @@ export class IsTodoMineOrAdminGuard implements CanActivate {
 
     const todoId = +req.params['todoId'];
 
+    // validation pipe에서 error처리하도록 하자
+    if (isNaN(todoId)) return true;
+
+    if (req.user.role <= RoleEnum.SUB_ADMIN) return true;
+
     const todo = await this.todoService.findTodoById(todoId);
 
     if (!todo) throw new NotFoundException('해당 todo는 존재하지 않습니다.');
-
-    if (req.user.role <= RoleEnum.SUB_ADMIN) return true;
 
     const isMine = todo.author.id === req.user.id;
 

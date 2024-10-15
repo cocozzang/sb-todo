@@ -35,14 +35,14 @@ export class TodoController {
   @UseGuards(IsTodoMineOrAdminGuard)
   @Get(':todoId')
   async getTodoById(@Param('todoId', ParseIntPipe) todoId: number) {
-    const feed = await this.todoService.findTodoById(todoId);
+    const todo = await this.todoService.findTodoById(todoId);
 
-    if (!feed)
+    if (!todo)
       throw new NotFoundException(
         `해당 todoId: ${todoId} 는 존재하지 않습니다.`,
       );
 
-    return feed;
+    return todo;
   }
 
   @Post()
@@ -68,7 +68,12 @@ export class TodoController {
 
   @UseGuards(IsTodoMineOrAdminGuard)
   @Delete(':todoId')
-  deleteTodoById(@Param('todoId', ParseIntPipe) todoId: number) {
-    return this.todoService.removeTodo(todoId);
+  async deleteTodoById(@Param('todoId', ParseIntPipe) todoId: number) {
+    const deleteResult = await this.todoService.removeTodo(todoId);
+
+    if (!deleteResult.affected)
+      throw new NotFoundException('해당 todo는 존재하지않습니다.');
+
+    return true;
   }
 }
