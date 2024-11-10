@@ -29,6 +29,7 @@ import {
 } from './common/validation';
 import { RedisModule } from './common/redis.module';
 import * as cookieParser from 'cookie-parser';
+import { LoggingInterceptor } from './common/interceptor';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import * as cookieParser from 'cookie-parser';
       }),
     },
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_GUARD, useClass: AuthenticatedGuard },
     { provide: APP_GUARD, useClass: RoleGuard },
     AppService,
