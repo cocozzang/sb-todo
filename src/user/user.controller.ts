@@ -40,11 +40,12 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @Param('userId') userId: number,
   ) {
-    const user = await this.getUserById(userId);
-
     const updateResult = await this.userService.updateUser(dto, userId);
 
-    if (!updateResult) return false;
+    if (updateResult.affected === 0)
+      throw new NotFoundException('해당 유저는 존재하지 않습니다.');
+
+    const user = await this.getUserById(userId);
 
     req.res.cookie(
       'user.info',

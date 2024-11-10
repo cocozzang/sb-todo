@@ -26,7 +26,7 @@ export class UserService {
 
     const updateResult = await this.userRepository.update({ id: userId }, dto);
 
-    return updateResult.affected === 0 ? false : true;
+    return updateResult;
   }
 
   async deleteUser(userId: number) {
