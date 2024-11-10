@@ -8,7 +8,12 @@ async function bootstrap() {
   const conf = config({ path: `.env.${process.env.NODE_ENV ?? 'dev'}` });
   dotenvExpand.expand(conf);
 
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  });
 
   let port: number;
 
