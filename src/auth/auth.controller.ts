@@ -43,7 +43,7 @@ export class AuthController {
         profile: user.profileImage,
       }),
       {
-        httpOnly: true,
+        httpOnly: false,
         maxAge: COOKIE_MAX_AGE,
       },
     );
@@ -66,7 +66,7 @@ export class AuthController {
         profile: user.profileImage,
       }),
       {
-        httpOnly: true,
+        httpOnly: false,
         maxAge: COOKIE_MAX_AGE,
       },
     );
