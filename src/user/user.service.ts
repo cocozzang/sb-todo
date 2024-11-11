@@ -30,8 +30,8 @@ export class UserService {
   }
 
   async deleteUser(userId: number) {
-    await this.userRepository.delete({ id: userId });
+    const deleteResult = await this.userRepository.delete({ id: userId });
 
-    return true;
+    return deleteResult;
   }
 }

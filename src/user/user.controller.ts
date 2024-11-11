@@ -71,7 +71,8 @@ export class UserController {
 
     const deleteResult = await this.userService.deleteUser(userId);
 
-    if (!deleteResult) return false;
+    if (deleteResult.affected === 0)
+      throw new NotFoundException('해당 유저는 존재하지 않습니다.');
 
     req.res.clearCookie('user.info');
     req.session.destroy(() => {});
