@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { config } from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
+// 배포만 하려면 commit에 tag달고 push해야하는건가;
 async function bootstrap() {
   const conf = config({ path: `.env.${process.env.NODE_ENV ?? 'dev'}` });
   dotenvExpand.expand(conf);
