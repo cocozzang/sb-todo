@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TodoEntity } from './entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreateTodoDto, UpdateTodoDto } from './dto';
 
 @Injectable()
@@ -12,7 +12,10 @@ export class TodoService {
   ) {}
 
   findAllMyTodo(userId: number) {
-    return this.todoRepository.find({ where: { author: { id: userId } } });
+    return this.todoRepository.find({
+      where: { author: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   findAllTodoForAdmin() {
@@ -44,8 +47,8 @@ export class TodoService {
   }
 
   async removeTodo(todoId: number) {
-    await this.todoRepository.delete({ id: todoId });
+    const res: DeleteResult = await this.todoRepository.delete({ id: todoId });
 
-    return true;
+    return res;
   }
 }

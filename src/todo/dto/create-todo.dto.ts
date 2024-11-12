@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/mapped-types';
 import { TodoEntity } from '../entity';
-import { IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class CreateTodoDto extends PickType(TodoEntity, [
   'title',
@@ -12,4 +12,12 @@ export class CreateTodoDto extends PickType(TodoEntity, [
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsDate()
+  @IsOptional()
+  startDate: Date | null;
+
+  @IsDate()
+  @IsOptional()
+  endDate: Date | null;
 }

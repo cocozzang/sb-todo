@@ -52,7 +52,7 @@ export class UserEntity extends BaseModel {
   })
   role: RoleEnum;
 
-  @OneToMany(() => TodoEntity, (todo) => todo.author)
+  @OneToMany(() => TodoEntity, (todo) => todo.author, { cascade: true })
   todos: TodoEntity[];
 
   @BeforeInsert()

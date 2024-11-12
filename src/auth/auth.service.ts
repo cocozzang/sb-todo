@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProviderEnum, UserEntity } from 'src/user/entity';
@@ -56,11 +56,7 @@ export class AuthService {
   }
 
   async registerByCredential(dto: RegisterByCredentialDto) {
-    const salt = await bcrypt.genSalt(
-      +this.configService.get(ENV_HASH_ROUND_KEY),
-    );
-
-    const hash = await bcrypt.hash(dto.password, salt);
+    const hash = await this.hashPassword(dto.password);
 
     const userInstance = this.userRepository.create({
       ...dto,
@@ -72,13 +68,21 @@ export class AuthService {
       await this.userRepository.insert(userInstance);
     } catch (error) {
       if (error.code === '23505')
-        throw new UnprocessableEntityException(
-          '해당 account는 이미 존재합니다.',
-        );
+        throw new ConflictException('해당 account는 이미 존재합니다.');
 
       throw error;
     }
 
     return userInstance;
+  }
+
+  async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt(
+      +this.configService.get(ENV_HASH_ROUND_KEY),
+    );
+
+    const hash = await bcrypt.hash(password, salt);
+
+    return hash;
   }
 }

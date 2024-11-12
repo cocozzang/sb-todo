@@ -1,38 +1,44 @@
 import {
   ClassSerializerInterceptor,
+  HttpException,
+  HttpStatus,
+  Inject,
   MiddlewareConsumer,
   Module,
   NestModule,
+  ValidationError,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { dataSourceOptions } from 'database/data-source';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
-import * as redis from 'redis';
 import RedisStore from 'connect-redis';
 import * as session from 'express-session';
-import {
-  ENV_REDIS_PASSWORD_KEY,
-  ENV_REDIS_URI_KEY,
-  ENV_SESSION_SECRET_KEY,
-} from './common/const';
+import { COOKIE_MAX_AGE, ENV_SESSION_SECRET_KEY } from './common/const';
 import { UserModule } from './user/user.module';
 import * as passport from 'passport';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthenticatedGuard, RoleGuard } from './auth/guard';
-
-const ENV = process.env.NODE_ENV;
+import { dataSourceOptions } from '../database/data-source';
+import {
+  getAllConstraints,
+  getCustomValidationError,
+} from './common/validation';
+import { RedisModule } from './common/redis.module';
+import * as cookieParser from 'cookie-parser';
+import { LoggingInterceptor } from './common/interceptor';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
-      envFilePath: !ENV ? '.env.dev' : `.env.${ENV}`,
+      envFilePath: `.env.${process.env.NODE_ENV ?? 'dev'}`,
     }),
+    RedisModule,
     TypeOrmModule.forRoot(dataSourceOptions),
     TodoModule,
     AuthModule,
@@ -40,41 +46,53 @@ const ENV = process.env.NODE_ENV;
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        exceptionFactory: (errors: ValidationError[]) =>
+          new HttpException(
+            getCustomValidationError(getAllConstraints(errors)),
+            HttpStatus.UNPROCESSABLE_ENTITY,
+          ),
+      }),
+    },
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_GUARD, useClass: AuthenticatedGuard },
     { provide: APP_GUARD, useClass: RoleGuard },
     AppService,
   ],
 })
 export class AppModule implements NestModule {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject('REDIS_STORE') private readonly redisStore: RedisStore,
+  ) {}
 
   configure(consumer: MiddlewareConsumer) {
-    const redisClient = redis.createClient({
-      url: this.configService.get(ENV_REDIS_URI_KEY),
-      password: this.configService.get(ENV_REDIS_PASSWORD_KEY),
-    });
-
-    redisClient.connect().catch(console.error);
-
-    const redisStore = new RedisStore({ client: redisClient });
-
     consumer
       .apply(
         session({
-          store: redisStore,
+          store: this.redisStore,
           resave: false,
           saveUninitialized: false,
           secret: this.configService.get(ENV_SESSION_SECRET_KEY),
           cookie: {
             httpOnly: true,
-            maxAge: 300000, // 5분
+            maxAge: COOKIE_MAX_AGE, // one day
+            secure: false,
+            sameSite: 'lax',
           },
-          rolling: true,
+          rolling: false,
         }),
 
         passport.initialize(),
         passport.session(),
+        cookieParser(),
       )
       .forRoutes('*');
   }
